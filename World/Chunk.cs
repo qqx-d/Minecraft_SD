@@ -1,3 +1,4 @@
+using minecraft.Rendering;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
@@ -6,6 +7,7 @@ namespace minecraft;
 public class Chunk
 {
     public MeshRenderer Mesh { get; private set; }
+    public MeshRenderer TransparentMesh { get; private set; }
 
     private Dictionary<Vector3Int, Block> _blocks = new();
     public Vector3Int Position { get; private set; }
@@ -34,9 +36,9 @@ public class Chunk
 
     private void GenerateBlocks(float[,] heightMap)
     {
-        for (int x = 0; x < WorldGenerator.ChunkWidth; x++)
+        for(var x = 0; x < WorldGenerator.ChunkWidth; x++)
         {
-            for (int z = 0; z < WorldGenerator.ChunkWidth; z++)
+            for(var z = 0; z < WorldGenerator.ChunkWidth; z++)
             {
                 int columnHeight = (int)MathF.Floor(heightMap[x, z]);
 
@@ -102,12 +104,4 @@ public class Chunk
     {
         return _blocks.TryGetValue(localPos, out block);
     }
-    
-    public static bool IsBlockAt(Vector3 position)
-    {
-        var posInt = (Vector3Int)position;
-        
-        return WorldGenerator.Instance.TryGetBlockGlobal(posInt) != null;
-    }
-
 }

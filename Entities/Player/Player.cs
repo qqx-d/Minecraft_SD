@@ -1,3 +1,4 @@
+using minecraft.Entities;
 using mmd_sd.Helpers;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;

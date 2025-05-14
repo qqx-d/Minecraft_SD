@@ -2,9 +2,11 @@ namespace minecraft;
 
 public static class TreeFeature
 {
+    private static WorldGenerator WorldGenerator => WorldGenerator.Instance;
+    
     public static void GenerateTreesInArea(Vector3Int areaOrigin)
     {
-        const int step = 4; // шаг в клетках между попытками посадки
+        const int step = 4;
 
         for (int x = 0; x < WorldGenerator.ChunkWidth; x += step)
         for (int z = 0; z < WorldGenerator.ChunkWidth; z += step)
@@ -13,8 +15,8 @@ public static class TreeFeature
             int worldZ = (int)(areaOrigin.Z + z);
 
             float forestNoise = WorldGenerator.ForestNoise.GetNoise(worldX, worldZ);
-            if (forestNoise < 0.6f) continue; // только в лесу
-
+            if (forestNoise < 0.6f) continue;
+            
             float chance = WorldGenerator.FastNoiseLite.GetNoise(worldX + 1000, worldZ + 1000);
             if (chance > 0.85f)
             {
@@ -30,8 +32,11 @@ public static class TreeFeature
         for (int y = WorldGenerator.ChunkHeight - 1; y >= 0; y--)
         {
             var pos = new Vector3Int(x, y, z);
-            var block = WorldGenerator.Instance.TryGetBlockGlobal(pos);
-            if (block != null && block.ID == 1) return pos; // трава
+
+            if(WorldGenerator.TryGetBlockGlobal(pos, out var block))
+            {
+                if (block.Id == 1) return pos;
+            }
         }
         return null;
     }
@@ -39,7 +44,7 @@ public static class TreeFeature
     private static void PlaceTreeAt(Vector3Int basePos)
     {
         for (int i = 0; i < 4; i++)
-            WorldGenerator.Instance.AddBlockGlobal(basePos + new Vector3Int(0, i, 0), new Block(4)); // wood
+            WorldGenerator.AddBlockGlobal(basePos + new Vector3Int(0, i, 0), new Block(4)); // wood
 
         for (int dx = -1; dx <= 1; dx++)
         for (int dy = 0; dy <= 2; dy++)
@@ -47,8 +52,11 @@ public static class TreeFeature
         {
             if (dx == 0 && dy == 1 && dz == 0) continue;
             var leafPos = basePos + new Vector3Int(dx, 3 + dy, dz);
-            if (WorldGenerator.Instance.TryGetBlockGlobal(leafPos) == null)
-                WorldGenerator.Instance.AddBlockGlobal(leafPos, new Block(5));
+
+            if (WorldGenerator.TryGetBlockGlobal(leafPos, out _))
+            {
+                WorldGenerator.AddBlockGlobal(leafPos, new Block(5));
+            }
         }
     }
 }

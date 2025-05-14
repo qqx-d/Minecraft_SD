@@ -21,14 +21,15 @@ public class BlockInteractor
             var checkPos = rayOrigin + rayDirection * i;
             var blockPos = WorldToBlock(checkPos - rayDirection * 0.01f);
 
-            var block = WorldGenerator.Instance.TryGetBlockGlobal(blockPos);
-            if (block != null && block.ID != 0)
+            if(WorldGenerator.Instance.TryGetBlockGlobal(blockPos, out var block))
             {
-                WorldGenerator.Instance.RemoveBlockGlobal(blockPos);
-                return true;
+                if(!block.IsTransparent())
+                {
+                    WorldGenerator.Instance.RemoveBlockGlobal(blockPos);
+                    return true;
+                }
             }
         }
-
         return false;
     }
 
@@ -41,32 +42,31 @@ public class BlockInteractor
         {
             var checkPos = rayOrigin + rayDirection * i;
             var blockPos = WorldToBlock(checkPos);
-            var block = WorldGenerator.Instance.TryGetBlockGlobal(blockPos);
 
-            if (block != null && block.ID != 0)
+            WorldGenerator.Instance.TryGetBlockGlobal(blockPos, out var block);
+            
+            if (block == null || block.IsTransparent()) continue;
+     
+            var prevPoint = checkPos - rayDirection * 0.05f;
+            var placePos = WorldToBlock(prevPoint);
+
+            var blockBox = new AABB(
+                new Vector3(placePos.X - 0.2f, placePos.Y + 0.5f, placePos.Z - 0.2f),
+                Vector3.One
+            );
+
+            if(!_player.GetAabb().Intersects(blockBox))
             {
-                var prevPoint = checkPos - rayDirection * 0.05f;
-                var placePos = WorldToBlock(prevPoint);
-
-                var blockBox = new AABB(
-                    new Vector3(placePos.X - 0.2f, placePos.Y + 0.5f, placePos.Z - 0.2f),
-                    Vector3.One
-                );
-
-                if (!_player.GetAabb().Intersects(blockBox))
+                WorldGenerator.Instance.TryGetBlockGlobal(blockPos, out var existing);
+                
+                if(existing != null || block.IsTransparent())
                 {
-                    var existing = WorldGenerator.Instance.TryGetBlockGlobal(placePos);
-                    if (existing == null || existing.ID == 0)
-                    {
-                        WorldGenerator.Instance.AddBlockGlobal(placePos, new Block(1));
-                        return true;
-                    }
+                    WorldGenerator.Instance.AddBlockGlobal(placePos, new Block(1));
+                    return true;
                 }
-
-                break;
             }
+            break;
         }
-
         return false;
     }
 

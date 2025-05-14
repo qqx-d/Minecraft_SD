@@ -1,12 +1,10 @@
 using OpenTK.Mathematics;
-using System.Collections.Generic;
 
-namespace minecraft;
+namespace minecraft.Rendering;
 
 public static class BlockRenderer
 {
-    
-    public const int TextureAltasSize = 16;
+    private const int TextureAtlasSize = 16;
     
     public static void AddFace(BlockFace face, Vector3 position, Vector2 uvOffset, List<float> vertices, List<uint> indices, ref uint vertexOffset)
     {
@@ -40,9 +38,9 @@ public static class BlockRenderer
             new(0, 1)
         ];
 
-        var tileSize = 1f / TextureAltasSize;
+        var tileSize = 1f / TextureAtlasSize;
 
-        for (int i = 0; i < 4; i++)
+        for (var i = 0; i < 4; i++)
         {
             var final = faceVerts[i] + position;
 

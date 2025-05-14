@@ -43,7 +43,11 @@ public static class ChunkRenderer
             AtlasTexture.Use(TextureUnit.Texture0);
             chunk.Mesh.Shader.SetInt("texture0", 0);
      
+            
+            
             chunk.Mesh.Draw();
+            
+            
         }
     }
 }

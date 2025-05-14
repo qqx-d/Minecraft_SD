@@ -20,6 +20,11 @@ public class Window : GameWindow
 
     public Window(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings)
     {
+        GL.Enable(EnableCap.DepthTest);
+        GL.Enable(EnableCap.Blend);
+
+        GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+        
         ActiveCamera = new Camera( Width / (float)Height);
         
         ActiveCamera.transform.position = new Vector3(0, 10, 0);

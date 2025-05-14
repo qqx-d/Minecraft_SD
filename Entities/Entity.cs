@@ -1,6 +1,6 @@
 using OpenTK.Mathematics;
 
-namespace minecraft;
+namespace minecraft.Entities;
 
 public abstract class Entity
 {

@@ -30,3 +30,4 @@ C:\Users\mdima\RiderProjects\minecraft\obj\Debug\net8.0\minecraft.genruntimeconf
 C:\Users\mdima\RiderProjects\minecraft\obj\Debug\net8.0\ref\minecraft.dll
 C:\Users\mdima\RiderProjects\minecraft\bin\Debug\net8.0\StbImageSharp.dll
 C:\Users\mdima\RiderProjects\minecraft\bin\Debug\net8.0\Udun.FastNoiseLite.dll
+C:\Users\mdima\RiderProjects\minecraft\obj\Debug\net8.0\minecraft.sourcelink.json

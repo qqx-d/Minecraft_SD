@@ -1,28 +1,28 @@
 using OpenTK.Mathematics;
 
-namespace minecraft;
+namespace minecraft.Rendering;
 
 public static class ChunkMeshBuilder
 {
 
     private const int TileCountInRaw = 16;
-    private static readonly Dictionary<int, Vector2> _uvOffsets = new();
+    private static readonly Dictionary<int, Vector2> UvOffsets = new();
     
     public static void BuildChunkMesh(Chunk chunk)
     {
-        List<float> vertices = new();
-        List<uint> indices = new();
+        var vertices = new  List<float>();
+        var  indices = new List<uint>();
         uint offset = 0;
 
         var blocks = chunk.GetAllBlocks();
-        Vector3Int chunkOrigin = chunk.Position;
+        var chunkOrigin = chunk.Position;
 
         foreach (var kvp in blocks)
         {
             var localPos = kvp.Key;
             var block = kvp.Value;
             
-            if (block.ID == 0) continue;
+            if (block.Id == 0) continue;
             
             var worldPos = new Vector3Int(
                 chunkOrigin.X + localPos.X,
@@ -32,12 +32,13 @@ public static class ChunkMeshBuilder
 
             foreach (var face in Enum.GetValues<BlockFace>())
             {
-                Vector3Int neighborPos = worldPos + GetDirection(face);
+                var neighborPos = worldPos + GetDirection(face);
                 
-                if (WorldGenerator.Instance.TryGetBlockGlobal(neighborPos) == null)
+                if(!WorldGenerator.Instance.TryGetBlockGlobal(neighborPos, out _))
                 {
-                    Vector3 positionVec = new(localPos.X, localPos.Y, localPos.Z);
-                    Vector2 uvOffset = _uvOffsets[block.ID];
+                    var positionVec = new Vector3(localPos.X, localPos.Y, localPos.Z);
+                    var uvOffset = UvOffsets[block.Id];
+                    
                     BlockRenderer.AddFace(face, positionVec, uvOffset, vertices, indices, ref offset);
                 }
             }
@@ -60,11 +61,11 @@ public static class ChunkMeshBuilder
         };
     }
 
-    public static void GenerateUVOffsets()
+    public static void GenerateUvOffsets()
     {
         for (var i = 0; i < TileCountInRaw; i++)
         {
-            _uvOffsets.Add(i, new Vector2(1f / TileCountInRaw * i, 0f));
+            UvOffsets.Add(i, new Vector2(1f / TileCountInRaw * i, 0f));
         }
     }
 }

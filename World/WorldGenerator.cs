@@ -66,7 +66,7 @@ public class WorldGenerator
                 if (!chunk.Mesh.IsMeshUploaded)
                 {
                     chunk.BuildMesh();
-                    //TreeFeature.GenerateTreesInArea(chunk.Position);
+                    TreeFeature.GenerateTreesInArea(chunk.Position);
                 }
 
                 ChunkRenderer.AddToRender(chunk);
@@ -132,14 +132,14 @@ public class WorldGenerator
     }
 
     
-    public Block? TryGetBlockGlobal(Vector3Int worldPos)
+    public bool TryGetBlockGlobal(Vector3Int worldPos, out Block blockAtGlobal)
     {
         var chunkX = (int)MathF.Floor(worldPos.X / ChunkWidth) * ChunkWidth;
         var chunkZ = (int)MathF.Floor(worldPos.Z / ChunkWidth) * ChunkWidth;
 
         var chunkPos = new Vector3Int(chunkX, 0, chunkZ);
         
-        if (_chunks.TryGetValue(chunkPos, out var chunk))
+        if(_chunks.TryGetValue(chunkPos, out var chunk))
         {
             var localX = (int)(worldPos.X - chunkPos.X);
             var localY = (int)(worldPos.Y);
@@ -147,10 +147,16 @@ public class WorldGenerator
 
             var localPos = new Vector3Int(localX, localY, localZ);
 
-            if (chunk.TryGetBlockAt(localPos, out var block)) return block;
-
+            if (chunk.TryGetBlockAt(localPos, out var block))
+            {
+                blockAtGlobal = block;
+                
+                return true;
+            }
         }
 
-        return null;
+        blockAtGlobal = null;
+        
+        return false;
     }
 }
