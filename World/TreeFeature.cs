@@ -53,7 +53,7 @@ public static class TreeFeature
             if (dx == 0 && dy == 1 && dz == 0) continue;
             var leafPos = basePos + new Vector3Int(dx, 3 + dy, dz);
 
-            if (WorldGenerator.TryGetBlockGlobal(leafPos, out _))
+            if(!WorldGenerator.TryGetBlockGlobal(leafPos, out _))
             {
                 WorldGenerator.AddBlockGlobal(leafPos, new Block(5));
             }

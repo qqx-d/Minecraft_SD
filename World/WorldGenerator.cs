@@ -9,7 +9,7 @@ public class WorldGenerator
     
     public const int ChunkWidth = 16;
     public const int ChunkHeight = 16;
-    public const int RenderDistance = 4;
+    public const int RenderDistance = 8;
     
     public const int SeaLevel = 4;
     
@@ -56,24 +56,34 @@ public class WorldGenerator
         var playerChunkX = (int)MathF.Floor(targetPosition.X / ChunkWidth);
         var playerChunkZ = (int)MathF.Floor(targetPosition.Z / ChunkWidth);
 
+        var chunksToRender = new List<Chunk>();
+
         for (var x = -RenderDistance; x <= RenderDistance; x++)
+        for (var z = -RenderDistance; z <= RenderDistance; z++)
         {
-            for (var z = -RenderDistance; z <= RenderDistance; z++)
+            var chunkPos = new Vector3Int(playerChunkX + x, 0, playerChunkZ + z) * ChunkWidth;
+            var chunk = GetChunkAt(chunkPos);
+
+            if (!chunk.DataGenerated)
             {
-                var chunkPos = new Vector3Int(playerChunkX + x, 0, playerChunkZ + z) * ChunkWidth;
-                var chunk = GetChunkAt(chunkPos);
-
-                if (!chunk.Mesh.IsMeshUploaded)
-                {
-                    chunk.BuildMesh();
-                    TreeFeature.GenerateTreesInArea(chunk.Position);
-                }
-
-                ChunkRenderer.AddToRender(chunk);
-                
+                chunk.GenerateData();
             }
+
+            chunksToRender.Add(chunk);
+        }
+        
+        foreach (var chunk in chunksToRender)
+        {
+            if (!chunk.Mesh.IsMeshUploaded)
+            {
+                chunk.BuildMesh();
+                TreeFeature.GenerateTreesInArea(chunk.Position);
+            }
+
+            ChunkRenderer.AddToRender(chunk);
         }
     }
+
     
     public void AddBlockGlobal(Vector3Int worldPos, Block block)
     {

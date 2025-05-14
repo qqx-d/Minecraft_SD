@@ -1,18 +1,19 @@
+using minecraft.World;
 using OpenTK.Mathematics;
 
 namespace minecraft.Rendering;
 
 public static class ChunkMeshBuilder
 {
-
-    private const int TileCountInRaw = 16;
-    private static readonly Dictionary<int, Vector2> UvOffsets = new();
-    
     public static void BuildChunkMesh(Chunk chunk)
     {
-        var vertices = new  List<float>();
-        var  indices = new List<uint>();
-        uint offset = 0;
+        var verticesOpaque = new List<float>();
+        var indicesOpaque  = new List<uint>();
+        var verticesWater  = new List<float>();
+        var indicesWater   = new List<uint>();
+
+        uint offsetOpaque = 0;
+        uint offsetWater  = 0;
 
         var blocks = chunk.GetAllBlocks();
         var chunkOrigin = chunk.Position;
@@ -21,9 +22,8 @@ public static class ChunkMeshBuilder
         {
             var localPos = kvp.Key;
             var block = kvp.Value;
-            
             if (block.Id == 0) continue;
-            
+
             var worldPos = new Vector3Int(
                 chunkOrigin.X + localPos.X,
                 chunkOrigin.Y + localPos.Y,
@@ -33,18 +33,31 @@ public static class ChunkMeshBuilder
             foreach (var face in Enum.GetValues<BlockFace>())
             {
                 var neighborPos = worldPos + GetDirection(face);
+
+                var neighborTransparent = 
+                    !WorldGenerator.Instance.TryGetBlockGlobal(neighborPos, out var neighborBlock) || neighborBlock.IsTransparent();
+
+                var positionVec = new Vector3(localPos.X, localPos.Y, localPos.Z);
+                var blockTexture = BlockTextureRegistry.BlockTextures[block.Id];
+                var uvOffset = blockTexture.GetUvForFace(face);
                 
-                if(!WorldGenerator.Instance.TryGetBlockGlobal(neighborPos, out _))
+                if (neighborTransparent && !block.IsTransparent())
                 {
-                    var positionVec = new Vector3(localPos.X, localPos.Y, localPos.Z);
-                    var uvOffset = UvOffsets[block.Id];
-                    
-                    BlockRenderer.AddFace(face, positionVec, uvOffset, vertices, indices, ref offset);
+                 
+                    BlockRenderer.AddFace(face, positionVec, uvOffset, verticesOpaque, indicesOpaque, ref offsetOpaque);
                 }
+                else if (!WorldGenerator.Instance.TryGetBlockGlobal(neighborPos, out _) && block.IsTransparent())
+                {
+                    BlockRenderer.AddFace(face, positionVec, uvOffset, verticesWater, indicesWater, ref offsetWater);
+                }
+
             }
+
         }
 
-        chunk.Mesh.Upload(vertices.ToArray(), indices.ToArray());
+        chunk.Mesh.Upload(verticesOpaque.ToArray(), indicesOpaque.ToArray());
+
+        chunk.TransparentMesh.Upload(verticesWater.ToArray(), indicesWater.ToArray());
     }
 
     private static Vector3Int GetDirection(BlockFace face)
@@ -59,13 +72,5 @@ public static class ChunkMeshBuilder
             BlockFace.Back   => new Vector3Int(0, 0, -1),
             _ => Vector3Int.Zero
         };
-    }
-
-    public static void GenerateUvOffsets()
-    {
-        for (var i = 0; i < TileCountInRaw; i++)
-        {
-            UvOffsets.Add(i, new Vector2(1f / TileCountInRaw * i, 0f));
-        }
     }
 }

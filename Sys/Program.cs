@@ -1,5 +1,6 @@
 ﻿using minecraft;
 using minecraft.Rendering;
+using minecraft.World;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
@@ -19,7 +20,7 @@ public static class Program
             });
         
         ChunkRenderer.AtlasTexture = Texture.LoadFromFile("Resources/Textures/atlas.png");
-        ChunkMeshBuilder.GenerateUvOffsets();
+        BlockTextureRegistry.Initialize();
         
         window.Run();
     }

@@ -59,9 +59,6 @@ public class Player : Entity
         flatRight = flatRight.Normalized();
 
         var inputDir = flatForward * Input.Vertical + flatRight * Input.Horizontal;
-
-
-        Console.WriteLine(Window.ActiveCamera.transform.forward);
         
         inputDir.Y = 0f;
 

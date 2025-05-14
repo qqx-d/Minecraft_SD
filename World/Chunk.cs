@@ -12,16 +12,15 @@ public class Chunk
     private Dictionary<Vector3Int, Block> _blocks = new();
     public Vector3Int Position { get; private set; }
     
-    public int BlockCount => _blocks.Count;
+    public bool DataGenerated { get; private set; } = false;
 
     private float _amplitude = 8f;
     
     public Chunk(Vector3Int position)
     {
-        Mesh = new MeshRenderer();
+        Mesh = new MeshRenderer("shader");
+        TransparentMesh = new MeshRenderer("water");
         Position = position;
-
-        GenerateData();
     }
     
     public void BuildMesh()
@@ -29,9 +28,11 @@ public class Chunk
         ChunkMeshBuilder.BuildChunkMesh(this);
     }
 
-    private void GenerateData()
+    public void GenerateData()
     {
         GenerateBlocks(GenerateHeightMap());
+        
+        DataGenerated = true;
     }
 
     private void GenerateBlocks(float[,] heightMap)
@@ -42,6 +43,15 @@ public class Chunk
             {
                 int columnHeight = (int)MathF.Floor(heightMap[x, z]);
 
+                if (columnHeight < WorldGenerator.SeaLevel)
+                {
+                    for (int y = columnHeight + 1; y <= WorldGenerator.SeaLevel; y++)
+                    {
+                        var waterPos = new Vector3Int(x, y, z);
+                        _blocks[waterPos] = new Block(6);
+                    }
+                }
+                
                 for (int y = 0; y < WorldGenerator.ChunkHeight; y++)
                 {
                     if (y > columnHeight) continue;
@@ -51,7 +61,35 @@ public class Chunk
                     var blockID = 0;
 
                     if (y == columnHeight)
-                        blockID = 1;
+                    {
+                        var isUnderWater = columnHeight < WorldGenerator.SeaLevel;
+                        var nearWater = false;
+                        
+                        for(var dx = -1; dx <= 1; dx++)
+                        {
+                            for(var dz = -1; dz <= 1; dz++)
+                            {
+                                var nx = x + dx;
+                                var nz = z + dz;
+
+                                if (nx < 0 || nz < 0 || nx >= WorldGenerator.ChunkWidth || nz >= WorldGenerator.ChunkWidth)
+                                    continue;
+
+                                var neighborHeight = (int)MathF.Floor(heightMap[nx, nz]);
+                                if(neighborHeight < WorldGenerator.SeaLevel)
+                                {
+                                    nearWater = true;
+                                    break;
+                                }
+                            }
+                            if (nearWater) break;
+                        }
+
+                        if (isUnderWater || nearWater)
+                            blockID = 7;
+                        else
+                            blockID = 1;
+                    }
                     else if (y >= columnHeight - 5)
                         blockID = 2;
                     else
@@ -59,15 +97,6 @@ public class Chunk
 
                     _blocks[blockPos] = new Block(blockID);
                     
-                }
-                
-                if (columnHeight < WorldGenerator.SeaLevel)
-                {
-                    for (int y = columnHeight + 1; y <= WorldGenerator.SeaLevel; y++)
-                    {
-                        var waterPos = new Vector3Int(x, y, z);
-                        _blocks[waterPos] = new Block(6);
-                    }
                 }
             }
         }

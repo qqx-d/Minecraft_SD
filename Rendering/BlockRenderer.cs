@@ -4,8 +4,6 @@ namespace minecraft.Rendering;
 
 public static class BlockRenderer
 {
-    private const int TextureAtlasSize = 16;
-    
     public static void AddFace(BlockFace face, Vector3 position, Vector2 uvOffset, List<float> vertices, List<uint> indices, ref uint vertexOffset)
     {
         Vector3[] faceVerts = face switch
@@ -37,9 +35,7 @@ public static class BlockRenderer
             new(1, 1),
             new(0, 1)
         ];
-
-        var tileSize = 1f / TextureAtlasSize;
-
+        
         for (var i = 0; i < 4; i++)
         {
             var final = faceVerts[i] + position;
@@ -51,8 +47,10 @@ public static class BlockRenderer
             vertices.Add(x);
             vertices.Add(y);
             vertices.Add(z);
-
-            var uv = new Vector2(baseUVs[i].X * tileSize, baseUVs[i].Y) + uvOffset;
+            
+            const float tileSize = 1f / 16f;
+            
+            var uv = uvOffset + baseUVs[i] * tileSize;
             vertices.Add(uv.X);
             vertices.Add(uv.Y);
         }

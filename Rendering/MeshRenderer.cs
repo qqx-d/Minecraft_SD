@@ -14,9 +14,9 @@ public class MeshRenderer
     public bool IsMeshUploaded { get; private set; } = false;
     public Shader Shader { get; private set; }
 
-    public MeshRenderer()
+    public MeshRenderer(string shaderName)
     {
-        Shader = new Shader("Resources/Shaders/shader.vert", "Resources/Shaders/shader.frag");
+        Shader = new Shader($"Resources/Shaders/{shaderName}.vert", $"Resources/Shaders/{shaderName}.frag");
     }
     
     public void Upload(float[] vertices, uint[] indices)
