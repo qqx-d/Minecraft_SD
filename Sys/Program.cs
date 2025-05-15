@@ -1,5 +1,6 @@
 ﻿using minecraft;
 using minecraft.Rendering;
+using minecraft.Sys;
 using minecraft.World;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
@@ -15,8 +16,6 @@ public static class Program
                 ClientSize = new Vector2i(Window.Width, Window.Height), 
                 Title = "Window", 
                 Flags = ContextFlags.ForwardCompatible,
-                APIVersion = new Version(3, 3),
-                DepthBits = 24,
             });
         
         ChunkRenderer.AtlasTexture = Texture.LoadFromFile("Resources/Textures/atlas.png");

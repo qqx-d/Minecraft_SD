@@ -1,3 +1,4 @@
+using minecraft.Sys;
 using OpenTK.Mathematics;
 using static FastNoiseLite;
 
@@ -9,7 +10,7 @@ public class WorldGenerator
     
     public const int ChunkWidth = 16;
     public const int ChunkHeight = 16;
-    public const int RenderDistance = 8;
+    public const int RenderDistance = 24;
     
     public const int SeaLevel = 4;
     
@@ -22,7 +23,7 @@ public class WorldGenerator
     {
         Instance = this;
 
-        int seed = new Random().Next(0, 99999999);
+        var seed = new Random().Next(0, 99999999);
         
         FastNoiseLite = new FastNoiseLite();
         FastNoiseLite.SetNoiseType(NoiseType.OpenSimplex2);
@@ -77,7 +78,7 @@ public class WorldGenerator
             if (!chunk.Mesh.IsMeshUploaded)
             {
                 chunk.BuildMesh();
-                TreeFeature.GenerateTreesInArea(chunk.Position);
+                //TreeFeature.GenerateTreesInArea(chunk.Position);
             }
 
             ChunkRenderer.AddToRender(chunk);

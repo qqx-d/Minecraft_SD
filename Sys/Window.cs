@@ -1,3 +1,5 @@
+using minecraft.Entities;
+using minecraft.Entities.Player;
 using mmd_sd.Helpers;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
@@ -5,14 +7,14 @@ using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
-namespace minecraft;
+namespace minecraft.Sys;
 
 public class Window : GameWindow
 {
     public static int Width { get; private set; } = 1000;
     public static int Height { get; private set; } = 800;
     public static Camera? ActiveCamera { get; private set; }
-    public static Player.Player? Player {get; private set; }
+    public static Player? Player {get; private set; }
     
     private WorldGenerator _worldGenerator;
     private PolygonMode _polygonMode = PolygonMode.Fill;
@@ -29,7 +31,7 @@ public class Window : GameWindow
         
         ActiveCamera.transform.position = new Vector3(0, 10, 0);
         
-        Player = new Player.Player
+        Player = new Player
         {
             Position = new Vector3(0, 15, 0)
         };
@@ -54,10 +56,13 @@ public class Window : GameWindow
         
         if(!IsFocused) return;
         
-        Input.UpdateState(KeyboardState, MouseState);
-        Physics.ApplyForceToEntities((float) e.Time);
+        var deltaTime = (float) e.Time;
         
-        Player.Update((float)e.Time);
+        Input.UpdateState(KeyboardState, MouseState);
+        
+        Physics.ApplyForceToEntities(deltaTime);
+        EntityProcessor.UpdateProcessor(deltaTime);
+        
         ActiveCamera.transform.position = Player.Position;
         
         _worldGenerator.Update();

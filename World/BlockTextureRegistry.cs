@@ -37,8 +37,8 @@ public static class BlockTextureRegistry
         // oak log
         BlockTextures[4] = new BlockTextureData
         {
-            Top = new Vector2(5, 0) * tileSize,     // log_top
-            Bottom = new Vector2(5, 0) * tileSize,  // log_bottom
+            Top = new Vector2(4, 0) * tileSize,     // log_top
+            Bottom = new Vector2(4, 0) * tileSize,  // log_bottom
             Side = new Vector2(4, 1) * tileSize     // log_side
         };
         

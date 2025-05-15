@@ -10,6 +10,7 @@ public static class Input
     private static Vector2 _lastMousePosition;
     private static bool _firstMouse = true;
 
+    public static float MouseWheelDelta { get; private set; }
     public static Vector2 MouseDelta { get; private set; }
     public static Vector2 MousePosition => _currentMouseState.Position;
 
@@ -25,6 +26,10 @@ public static class Input
         _currentMouseState = mouse;
 
         var currentPosition = mouse.Position;
+
+        MouseWheelDelta = mouse.ScrollDelta.Y;
+
+        Console.WriteLine(MouseWheelDelta);
 
         if (_firstMouse)
         {

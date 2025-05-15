@@ -43,7 +43,6 @@ public static class ChunkMeshBuilder
                 
                 if (neighborTransparent && !block.IsTransparent())
                 {
-                 
                     BlockRenderer.AddFace(face, positionVec, uvOffset, verticesOpaque, indicesOpaque, ref offsetOpaque);
                 }
                 else if (!WorldGenerator.Instance.TryGetBlockGlobal(neighborPos, out _) && block.IsTransparent())

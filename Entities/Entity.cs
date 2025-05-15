@@ -16,9 +16,12 @@ public abstract class Entity
     {
         Collider = new BoxCollider(size);
         Physics = new Physics(this);
+        
+        EntityProcessor.AddEntity(this);
     }
 
-    public abstract void Update(float deltaTime);
+    public virtual void Start() { }
+    public virtual void Update(float deltaTime) { }
 
     protected void MoveHorizontal(Vector3 direction, float speed, float dt)
     {

@@ -1,12 +1,15 @@
+using minecraft.Entities.Player;
+using minecraft.Sys;
 using OpenTK.Mathematics;
 
 namespace minecraft;
 
 public class BlockInteractor
 {
-    private readonly Player.Player _player;
+    
+    private readonly Player _player;
 
-    public BlockInteractor(Player.Player player)
+    public BlockInteractor(Player player)
     {
         _player = player;
     }
@@ -51,7 +54,7 @@ public class BlockInteractor
             var placePos = WorldToBlock(prevPoint);
 
             var blockBox = new AABB(
-                new Vector3(placePos.X - 0.2f, placePos.Y + 0.5f, placePos.Z - 0.2f),
+                new Vector3(placePos.X - 0.05f, placePos.Y + 0.5f, placePos.Z - 0.05f),
                 Vector3.One
             );
 
@@ -61,7 +64,7 @@ public class BlockInteractor
                 
                 if(existing != null || block.IsTransparent())
                 {
-                    WorldGenerator.Instance.AddBlockGlobal(placePos, new Block(1));
+                    WorldGenerator.Instance.AddBlockGlobal(placePos, new Block(_player.SelectedBlockID));
                     return true;
                 }
             }

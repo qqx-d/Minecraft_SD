@@ -1,9 +1,9 @@
-using minecraft.Entities;
 using mmd_sd.Helpers;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using Window = minecraft.Sys.Window;
 
-namespace minecraft.Player;
+namespace minecraft.Entities.Player;
 
 public class Player : Entity
 {
@@ -20,7 +20,9 @@ public class Player : Entity
     private const float PlaceDelay = 0.25f;
     
     private BlockInteractor _blockInteractor;
-    
+
+    public int SelectedBlockID { get; private set; }
+
     public Player() : base(new Vector3(0.6f, 1.8f, 0.6f))
     {
         _blockInteractor = new BlockInteractor(this);
@@ -35,26 +37,28 @@ public class Player : Entity
 
         if(_breakTimer <= 0f && Input.GetMouseButton(MouseButton.Button1))
         {
-            if (_blockInteractor.TryBreakBlock())
+            if(_blockInteractor.TryBreakBlock())
                 _breakTimer = BreakDelay;
         }
 
         if(_placeTimer <= 0f && Input.GetMouseButton(MouseButton.Button2))
         {
-            if (_blockInteractor.TryPlaceBlock())
+            if(_blockInteractor.TryPlaceBlock())
                 _placeTimer = PlaceDelay;
         }
+
+        SelectedBlockID = Math.Clamp(SelectedBlockID - Math.Sign(Input.MouseWheelDelta), 0, 7);
     }
 
     private void HandleInput(float deltaTime)
     {
         _currentSpeed = Input.GetKey(Keys.LeftControl) ? SprintSpeed : WalkSpeed;
         
-        Vector3 flatForward = Window.ActiveCamera.transform.forward;
+        var flatForward = Window.ActiveCamera.transform.forward;
         flatForward.Y = 0;
         flatForward = flatForward.Normalized();
 
-        Vector3 flatRight = Window.ActiveCamera.transform.right;
+        var flatRight = Window.ActiveCamera.transform.right;
         flatRight.Y = 0;
         flatRight = flatRight.Normalized();
 
