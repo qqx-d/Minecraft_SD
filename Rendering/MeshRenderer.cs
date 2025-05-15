@@ -10,7 +10,10 @@ public class MeshRenderer
     private int _vbo;
     private int _ebo;
     private int _indexCount;
-
+    
+    public float[]? Vertices;
+    public uint[]? Indices;
+    
     public bool IsMeshUploaded { get; private set; } = false;
     public Shader Shader { get; private set; }
 

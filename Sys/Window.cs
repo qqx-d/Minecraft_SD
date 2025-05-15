@@ -29,11 +29,12 @@ public class Window : GameWindow
         
         ActiveCamera = new Camera( Width / (float)Height);
         
-        ActiveCamera.transform.position = new Vector3(0, 10, 0);
+        ActiveCamera.transform.position = new Vector3(0, 300, 0);
+        //ActiveCamera.transform.eulerRotation = new Vector3(0, -90, 0);
         
         Player = new Player
         {
-            Position = new Vector3(0, 15, 0)
+            Position = new Vector3(0, 200, 0)
         };
         
         CrosshairRenderer.Initialize();
@@ -48,6 +49,8 @@ public class Window : GameWindow
         CursorState = CursorState.Grabbed;
         
         _worldGenerator = new WorldGenerator();
+
+        _worldGenerator.GenerateInitialChunks();
     }
     
     protected override void OnUpdateFrame(FrameEventArgs e)
@@ -99,10 +102,11 @@ public class Window : GameWindow
         if (_cameraMode == CameraMode.Free)
         {
             var direction = ActiveCamera.transform.forward * Input.Vertical + ActiveCamera.transform.right * Input.Horizontal;
+            
             ActiveCamera.Move(direction, 0.1f);
         }
         
-        if (Input.GetKey(Keys.F5))
+        if (Input.GetKeyDown(Keys.F5))
             _polygonMode = _polygonMode == PolygonMode.Fill ? PolygonMode.Line : PolygonMode.Fill;
 
         ActiveCamera.ProcessMouseMovement(-Input.MouseDelta.X, Input.MouseDelta.Y);

@@ -37,9 +37,9 @@ public static class ChunkRenderer
     {
         foreach (var chunk in chunks)
         {
-            if (!chunk.Mesh.IsMeshUploaded) continue;
+            if (!chunk.OpaqueMesh.IsMeshUploaded) continue;
 
-            var shader = chunk.Mesh.Shader;
+            var shader = chunk.OpaqueMesh.Shader;
             shader.Use();
             shader.SetMatrix4("view",       Window.ActiveCamera.GetViewMatrix());
             shader.SetMatrix4("projection", Window.ActiveCamera.GetProjectionMatrix());
@@ -53,7 +53,7 @@ public static class ChunkRenderer
             AtlasTexture.Use(TextureUnit.Texture0);
             shader.SetInt("texture0", 0);
 
-            chunk.Mesh.Draw();
+            chunk.OpaqueMesh.Draw();
         }
     }
     private static void RenderTransparentSupportedMesh(Chunk[] chunks)

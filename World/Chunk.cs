@@ -6,19 +6,21 @@ namespace minecraft;
 
 public class Chunk
 {
-    public MeshRenderer Mesh { get; private set; }
+    public MeshRenderer OpaqueMesh { get; private set; }
     public MeshRenderer TransparentMesh { get; private set; }
-
-    private Dictionary<Vector3Int, Block> _blocks = new();
-    public Vector3Int Position { get; private set; }
     
+
+    private readonly Dictionary<Vector3Int, Block> _blocks = new();
+    
+    public Vector3Int Position { get; private set; }
     public bool DataGenerated { get; private set; } = false;
+    
 
     private float _amplitude = 8f;
     
     public Chunk(Vector3Int position)
     {
-        Mesh = new MeshRenderer("shader");
+        OpaqueMesh = new MeshRenderer("shader");
         TransparentMesh = new MeshRenderer("water");
         Position = position;
     }

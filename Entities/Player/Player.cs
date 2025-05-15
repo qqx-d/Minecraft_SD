@@ -21,7 +21,7 @@ public class Player : Entity
     
     private BlockInteractor _blockInteractor;
 
-    public int SelectedBlockID { get; private set; }
+    public int SelectedBlockID { get; private set; } = 3;
 
     public Player() : base(new Vector3(0.6f, 1.8f, 0.6f))
     {

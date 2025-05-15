@@ -9,8 +9,8 @@ public static class ChunkMeshBuilder
     {
         var verticesOpaque = new List<float>();
         var indicesOpaque  = new List<uint>();
-        var verticesWater  = new List<float>();
-        var indicesWater   = new List<uint>();
+        var verticesTransparent  = new List<float>();
+        var indicesTransparent   = new List<uint>();
 
         uint offsetOpaque = 0;
         uint offsetWater  = 0;
@@ -47,16 +47,17 @@ public static class ChunkMeshBuilder
                 }
                 else if (!WorldGenerator.Instance.TryGetBlockGlobal(neighborPos, out _) && block.IsTransparent())
                 {
-                    BlockRenderer.AddFace(face, positionVec, uvOffset, verticesWater, indicesWater, ref offsetWater);
+                    BlockRenderer.AddFace(face, positionVec, uvOffset, verticesTransparent, indicesTransparent, ref offsetWater);
                 }
 
             }
 
         }
 
-        chunk.Mesh.Upload(verticesOpaque.ToArray(), indicesOpaque.ToArray());
-
-        chunk.TransparentMesh.Upload(verticesWater.ToArray(), indicesWater.ToArray());
+        chunk.OpaqueMesh.Vertices = verticesOpaque.ToArray();
+        chunk.OpaqueMesh.Indices = indicesOpaque.ToArray();
+        chunk.TransparentMesh.Vertices = verticesTransparent.ToArray();
+        chunk.TransparentMesh.Indices = indicesTransparent.ToArray();
     }
 
     private static Vector3Int GetDirection(BlockFace face)
