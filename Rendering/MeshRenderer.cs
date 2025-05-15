@@ -22,7 +22,7 @@ public class MeshRenderer
         Shader = new Shader($"Resources/Shaders/{shaderName}.vert", $"Resources/Shaders/{shaderName}.frag");
     }
     
-    public void Upload(float[] vertices, uint[] indices)
+    public void Upload(float[]? vertices, uint[]? indices)
     {
         _vao = GL.GenVertexArray();
         _vbo = GL.GenBuffer();

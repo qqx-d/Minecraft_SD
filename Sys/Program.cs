@@ -13,7 +13,7 @@ public static class Program
         using var window = new Window(GameWindowSettings.Default, 
             new NativeWindowSettings 
             { 
-                ClientSize = new Vector2i(Window.Width, Window.Height), 
+                ClientSize = new Vector2i(1000, 800), 
                 Title = "Window", 
                 Flags = ContextFlags.ForwardCompatible,
             });

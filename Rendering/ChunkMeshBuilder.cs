@@ -5,12 +5,15 @@ namespace minecraft.Rendering;
 
 public static class ChunkMeshBuilder
 {
+    
+    private static readonly BlockFace[] BlockFaces = Enum.GetValues<BlockFace>();
+    
     public static void BuildChunkMesh(Chunk chunk)
     {
         var verticesOpaque = new List<float>();
-        var indicesOpaque  = new List<uint>();
-        var verticesTransparent  = new List<float>();
-        var indicesTransparent   = new List<uint>();
+        var indicesOpaque = new List<uint>();
+        var verticesTransparent = new List<float>();
+        var indicesTransparent = new List<uint>();
 
         uint offsetOpaque = 0;
         uint offsetWater  = 0;
@@ -18,10 +21,8 @@ public static class ChunkMeshBuilder
         var blocks = chunk.GetAllBlocks();
         var chunkOrigin = chunk.Position;
 
-        foreach (var kvp in blocks)
+        foreach (var (localPos, block) in blocks)
         {
-            var localPos = kvp.Key;
-            var block = kvp.Value;
             if (block.Id == 0) continue;
 
             var worldPos = new Vector3Int(
@@ -30,7 +31,7 @@ public static class ChunkMeshBuilder
                 chunkOrigin.Z + localPos.Z
             );
 
-            foreach (var face in Enum.GetValues<BlockFace>())
+            foreach (var face in BlockFaces)
             {
                 var neighborPos = worldPos + GetDirection(face);
 

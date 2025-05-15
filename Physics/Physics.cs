@@ -1,4 +1,5 @@
 using minecraft.Entities;
+using minecraft.Sys;
 using OpenTK.Mathematics;
 
 namespace minecraft;
@@ -14,7 +15,7 @@ public class Physics
             Entities.Add(entity);
     }
 
-    public static void ApplyForceToEntities(float deltaTime)
+    public static void ApplyForceToEntities()
     {
         for(var i = 0; i < Entities.Count; i++)
         {
@@ -22,9 +23,9 @@ public class Physics
             
             // gravity
             entity.IsGrounded = false;
-            entity.Velocity.Y += Gravity * deltaTime;
+            entity.Velocity.Y += Gravity * Time.DeltaTime;
             
-            entity.Physics.MoveAxis(1, entity.Velocity.Y * deltaTime, ref entity.Position, ref entity.Velocity, entity.Collider, ref entity.IsGrounded);
+            entity.Physics.MoveAxis(1, entity.Velocity.Y * Time.DeltaTime, ref entity.Position, ref entity.Velocity, entity.Collider, ref entity.IsGrounded);
             
         }
     }

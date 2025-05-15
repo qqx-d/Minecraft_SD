@@ -4,12 +4,9 @@ namespace minecraft;
 
 public record struct Vector3Int
 {
-    
-    public float X, Y, Z;
-
+    public int X, Y, Z;
     public static Vector3Int Zero => new(0, 0, 0);
-    
-    public Vector3Int(float x = 0, float y = 0, float z = 0)
+    public Vector3Int(int x = 0, int y = 0, int z = 0)
     {
         X = x;
         Y = y;

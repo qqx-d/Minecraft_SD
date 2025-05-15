@@ -1,62 +1,62 @@
+using System;
+using OpenTK.Mathematics;
+
 namespace minecraft.World;
 
 public static class TreeFeature
 {
     private static WorldGenerator WorldGenerator => WorldGenerator.Instance;
-    
-    public static void GenerateTreesInArea(Vector3Int areaOrigin)
+
+    public static void GenerateTreesInArea(Chunk chunk)
     {
         const int step = 4;
 
         for (var x = 0; x < WorldGenerator.ChunkWidth; x += step)
         for (var z = 0; z < WorldGenerator.ChunkWidth; z += step)
         {
-            var worldX = (int)(areaOrigin.X + x);
-            var worldZ = (int)(areaOrigin.Z + z);
+            int worldX = (int) chunk.Position.X + x;
+            int worldZ = (int) chunk.Position.Z + z;
 
             var forestNoise = WorldGenerator.ForestNoise.GetNoise(worldX, worldZ);
-            if(forestNoise < 0.6f) continue;
-            
+            if (forestNoise < 0.4f) continue;
+
             var chance = WorldGenerator.FastNoiseLite.GetNoise(worldX + 1000, worldZ + 1000);
-            if(chance > 0.85f)
+            if (chance > 0.7f)
             {
-                Vector3Int? ground = FindGrass(worldX, worldZ);
-                if (ground.HasValue)
-                    PlaceTreeAt(ground.Value + new Vector3Int(0, 1, 0));
+                Vector3Int? localGround = FindGrassInChunk(chunk, x, z);
+                if (localGround.HasValue)
+                    PlaceTreeAtBuffered(chunk, localGround.Value + new Vector3Int(0, 1, 0));
             }
         }
     }
 
-    private static Vector3Int? FindGrass(int x, int z)
+    private static Vector3Int? FindGrassInChunk(Chunk chunk, int localX, int localZ)
     {
-        for (var y = WorldGenerator.ChunkHeight - 1; y >= 0; y--)
+        for (int y = WorldGenerator.ChunkHeight - 1; y >= 0; y--)
         {
-            var pos = new Vector3Int(x, y, z);
-
-            if(WorldGenerator.TryGetBlockGlobal(pos, out var block))
-            {
-                if (block.Id == 1) return pos;
-            }
+            var pos = new Vector3Int(localX, y, localZ);
+            if (chunk.TryGetBlockAt(pos, out var block) && block.Id == 1) // grass
+                return pos;
         }
+
         return null;
     }
 
-    private static void PlaceTreeAt(Vector3Int basePos)
+    private static void PlaceTreeAtBuffered(Chunk chunk, Vector3Int basePos)
     {
-        for (var i = 0; i < 4; i++)
-            WorldGenerator.AddBlockGlobal(basePos + new Vector3Int(0, i, 0), new Block(4));
+        // Ствол (4 блока вверх)
+        for (int i = 0; i < 4; i++)
+            chunk.BufferBlock(basePos + new Vector3Int(0, i, 0), new Block(4)); // log
 
-        for (var dx = -1; dx <= 1; dx++)
-        for (var dy = 0; dy <= 2; dy++)
-        for (var dz = -1; dz <= 1; dz++)
+        // Листва — 3x3x3
+        for (int dx = -1; dx <= 1; dx++)
+        for (int dy = 0; dy <= 2; dy++)
+        for (int dz = -1; dz <= 1; dz++)
         {
             if (dx == 0 && dy == 1 && dz == 0) continue;
-            var leafPos = basePos + new Vector3Int(dx, 3 + dy, dz);
 
-            if(!WorldGenerator.TryGetBlockGlobal(leafPos, out _))
-            {
-                WorldGenerator.AddBlockGlobal(leafPos, new Block(5));
-            }
+            var leafPos = basePos + new Vector3Int(dx, 3 + dy, dz);
+            chunk.BufferBlock(leafPos, new Block(5)); // leaf
         }
     }
 }

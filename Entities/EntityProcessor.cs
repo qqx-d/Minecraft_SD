@@ -1,3 +1,5 @@
+using minecraft.Sys;
+
 namespace minecraft.Entities;
 
 public static class EntityProcessor
@@ -15,11 +17,11 @@ public static class EntityProcessor
         Entities.Remove(entity);
     }
 
-    public static void UpdateProcessor(float deltaTime)
+    public static void UpdateProcessor()
     {
         for (int i = 0; i < Entities.Count; i++)
         {
-            Entities[i].Update(deltaTime);
+            Entities[i].Update(Time.DeltaTime);
         }
     }
 }
