@@ -29,8 +29,6 @@ public static class Input
 
         MouseWheelDelta = mouse.ScrollDelta.Y;
 
-        Console.WriteLine(MouseWheelDelta);
-
         if (_firstMouse)
         {
             _lastMousePosition = currentPosition;

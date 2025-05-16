@@ -1,3 +1,4 @@
+using minecraft.Sys;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
@@ -12,7 +13,6 @@ public static class CrosshairRenderer
 
     private static readonly float[] _vertices =
     {
-        // X, Y (NDC), U, V (optional)
         -0.01f, -0.01f,
         0.01f, -0.01f,
         0.01f,  0.01f,
@@ -33,7 +33,7 @@ public static class CrosshairRenderer
 
         _vao = GL.GenVertexArray();
         _vbo = GL.GenBuffer();
-        int ebo = GL.GenBuffer();
+        var ebo = GL.GenBuffer();
 
         GL.BindVertexArray(_vao);
 
@@ -59,9 +59,13 @@ public static class CrosshairRenderer
         GL.BindVertexArray(_vao);
 
         _shader.Use();
+        var aspect = Window.Size.X / (float)Window.Size.Y;
+        var projection = Matrix4.CreateOrthographicOffCenter(-aspect, aspect, -1, 1, -1, 1);
+        
+
         _shader.SetMatrix4("model", Matrix4.Identity);
         _shader.SetMatrix4("view", Matrix4.Identity);
-        _shader.SetMatrix4("projection", Matrix4.Identity);
+        _shader.SetMatrix4("projection", projection);
 
         GL.DrawElements(PrimitiveType.Triangles, _indices.Length, DrawElementsType.UnsignedInt, 0);
 

@@ -41,6 +41,7 @@ namespace minecraft
                 //   Data type of the pixels.
                 //   And finally, the actual pixels.
                 GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, image.Width, image.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, image.Data);
+                GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
             }
             
             // Now that our texture is loaded, we can set a few settings to affect how the image appears on rendering.

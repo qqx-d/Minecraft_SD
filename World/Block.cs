@@ -6,6 +6,7 @@ public class Block(int id)
     {
         0, // air
         6, // water
+        9, // grass
     };
 
     public int Id { get; private set; } = id;

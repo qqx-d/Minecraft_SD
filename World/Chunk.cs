@@ -16,7 +16,7 @@ public class Chunk
 
 
     private const float HeightAmplitude = 8f;
-    private const float CaveLevel = WorldGenerator.SeaLevel - 5f;
+    private const float GrassChance = 0.5f;
 
     public bool DataGenerated { get; private set; } = false;
     
@@ -64,34 +64,37 @@ public class Chunk
                         _blocks[waterPos] = new Block(6);
                     }
                 }
-                
+
                 for (var y = 0; y < WorldGenerator.ChunkHeight; y++)
                 {
                     var blockPos = new Vector3Int(x, y, z);
                     int blockId;
-                    
-                    if(y == columnHeight)
+
+                    if (y == columnHeight)
                     {
                         var isUnderWater = columnHeight < WorldGenerator.SeaLevel;
                         var nearWater = false;
-                        
-                        for(var dx = -1; dx <= 1; dx++)
+
+                        for (var dx = -1; dx <= 1; dx++)
                         {
-                            for(var dz = -1; dz <= 1; dz++)
+                            for (var dz = -1; dz <= 1; dz++)
                             {
                                 var nx = x + dx;
                                 var nz = z + dz;
 
-                                if (nx < 0 || nz < 0 || nx >= WorldGenerator.ChunkWidth || nz >= WorldGenerator.ChunkWidth)
+                                if (nx < 0 || nz < 0 || nx >= WorldGenerator.ChunkWidth ||
+                                    nz >= WorldGenerator.ChunkWidth)
                                     continue;
-
+    
                                 var neighborHeight = (int)MathF.Floor(heightMap[nx, nz]);
-                                if(neighborHeight < WorldGenerator.SeaLevel)
+                                
+                                if (neighborHeight < WorldGenerator.SeaLevel)
                                 {
                                     nearWater = true;
                                     break;
                                 }
                             }
+
                             if (nearWater) break;
                         }
 
@@ -99,16 +102,32 @@ public class Chunk
                             blockId = 7;
                         else
                             blockId = 1;
+                        
+                        _blocks[blockPos] = new Block(blockId);
+                        
+                        if (blockId == 1)
+                        {
+                            var abovePos = new Vector3Int(x, y + 1, z);
+                            var chance = WorldGenerator.Instance.Random.NextDouble();
+                            
+                            if (!_blocks.ContainsKey(abovePos) && chance < GrassChance)
+                            {
+                                _blocks[abovePos] = new Block(9);
+                            }
+                        }
+
                     }
-                    else if(y >= columnHeight - 5)
+                    else if (y >= columnHeight - 5)
                         blockId = 2;
                     else
                         blockId = 3;
 
-                    if (y == 0) 
-                        blockId = 8;
-                    else if(caveMap[x, y, z] > 0.4f || y > columnHeight)
+                    var depthFactor = (WorldGenerator.SeaLevel - y) / 6f;
+                    var caveThreshold = 0.4f + Math.Clamp(1f - depthFactor, 0, 1f);
+
+                    if (caveMap[x, y, z] > caveThreshold || y > columnHeight)
                         continue;
+
                     
                     _blocks[blockPos] = new Block(blockId);
                 }
@@ -120,9 +139,9 @@ public class Chunk
     {
         var map = new float[WorldGenerator.ChunkWidth, WorldGenerator.ChunkWidth];
 
-        for (int x = 0; x < WorldGenerator.ChunkWidth; x++)
+        for (var x = 0; x < WorldGenerator.ChunkWidth; x++)
         {
-            for (int z = 0; z < WorldGenerator.ChunkWidth; z++)
+            for (var z = 0; z < WorldGenerator.ChunkWidth; z++)
             {
                 var worldX = Position.X + x;
                 var worldZ = Position.Z + z;
@@ -130,6 +149,7 @@ public class Chunk
                 var baseHeight = WorldGenerator.ChunkHeight / 2f;
                 var noise = WorldGenerator.FastNoiseLite.GetNoise(worldX, worldZ);
                 var height = baseHeight + noise * HeightAmplitude;
+                
                 map[x, z] = height;
 
             }
@@ -146,12 +166,6 @@ public class Chunk
         for (var y = 0; y < WorldGenerator.ChunkHeight; y++)
         for (var z = 0; z < WorldGenerator.ChunkWidth; z++)
         {
-            if (y >= CaveLevel)
-            {
-                noiseMap[x, y, z] = -1f;
-                continue;
-            }
-
             var worldX = Position.X + x;
             var worldY = y;
             var worldZ = Position.Z + z;
@@ -168,7 +182,7 @@ public class Chunk
         _pendingTreeBlocks.Add((localPos, block));
     }
 
-    public void ApplyBufferedBlocks()
+    private void ApplyBufferedBlocks()
     {
         foreach (var (pos, block) in _pendingTreeBlocks)
             _blocks[pos] = block;
@@ -180,9 +194,9 @@ public class Chunk
     {
         return _blocks;
     }
+    
     public bool TryGetBlockAt(Vector3Int localPos, out Block block)
     {
         return _blocks.TryGetValue(localPos, out block);
     }
-    
 }

@@ -1,4 +1,4 @@
-namespace minecraft;
+namespace minecraft.Rendering;
 
 public enum BlockFace
 {

@@ -13,7 +13,9 @@ namespace minecraft.Sys;
 public class Window : GameWindow
 {
 
-    public static Vector2i WindowSize = new(1000, 800);
+    public static Vector2i Size = new(1000, 800);
+    public static int Width => Size.X;
+    public static int Height => Size.Y;
 
     public static Camera? ActiveCamera { get; private set; }
     public static Player? Player { get; private set; }
@@ -77,15 +79,20 @@ public class Window : GameWindow
     protected override void OnResize(ResizeEventArgs e)
     {
         base.OnResize(e);
-        GL.Viewport(0, 0, Size.X, Size.Y);
         
-        if(ActiveCamera != null)
-            ActiveCamera.AspectRatio = Size.X / (float)Size.Y;
+        GL.Viewport(0, 0, e.Size.X, e.Size.Y);
+
+        if (ActiveCamera != null)
+        {
+            ActiveCamera.AspectRatio = (e.Size.X / (float) e.Size.Y);
+        }
+        
+        Size = new Vector2i(e.Size.X, e.Size.Y);
     }
 
     private void InitializeObjects()
     {
-        ActiveCamera = new Camera(WindowSize.X / (float)WindowSize.Y)
+        ActiveCamera = new Camera(Size.X / (float)Size.Y)
         {
             transform =
             {
@@ -158,7 +165,7 @@ public class Window : GameWindow
             {
                 WindowBorder = WindowBorder.Resizable;
                 WindowState = WindowState.Normal;
-                Size = WindowSize;
+                ((NativeWindow)this).Size = Size;
                 CenterWindow();
             }
         }

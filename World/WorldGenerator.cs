@@ -10,6 +10,8 @@ public class WorldGenerator
 {
     public static WorldGenerator Instance { get; private set; }
     
+    public Random Random { get; } = new();
+    
     public const int ChunkWidth = 16;
     public const int ChunkHeight = 64;
     public const int RenderDistance = 12;

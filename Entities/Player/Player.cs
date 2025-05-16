@@ -21,7 +21,7 @@ public class Player : Entity
     
     private BlockInteractor _blockInteractor;
 
-    public int SelectedBlockID { get; private set; } = 3;
+    public int SelectedBlockID { get; private set; } = 1;
 
     public Player() : base(new Vector3(0.6f, 1.8f, 0.6f))
     {
@@ -47,7 +47,7 @@ public class Player : Entity
                 _placeTimer = PlaceDelay;
         }
 
-        SelectedBlockID = Math.Clamp(SelectedBlockID - Math.Sign(Input.MouseWheelDelta), 0, 7);
+        SelectedBlockID = Math.Clamp(SelectedBlockID - Math.Sign(Input.MouseWheelDelta), 1, 7);
     }
 
     private void HandleInput(float deltaTime)
