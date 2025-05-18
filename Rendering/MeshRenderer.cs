@@ -1,6 +1,6 @@
 using OpenTK.Graphics.OpenGL;
 
-namespace minecraft;
+namespace minecraft.Rendering;
 
 public class MeshRenderer
 {
@@ -35,7 +35,6 @@ public class MeshRenderer
 
         GL.BindBuffer(BufferTarget.ElementArrayBuffer, _ebo);
         GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length * sizeof(uint), indices, BufferUsageHint.StaticDraw);
-        
 
         GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, Stride, 0);
         GL.EnableVertexAttribArray(0);

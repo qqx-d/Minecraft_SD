@@ -1,22 +1,22 @@
 using OpenTK.Mathematics;
 
-namespace minecraft
+namespace minecraft.Entities
 {
     public class Transform
     {
         private Vector3 _position = Vector3.Zero;
         private Vector3 _scale = Vector3.One;
-        private Vector3 _eulerRotation = Vector3.Zero;
+        private Vector3 _rotationInDegrees = Vector3.Zero;
 
         private Vector3 _localPosition = Vector3.Zero;
         private Vector3 _localScale = Vector3.One;
-        private Vector3 _localEulerRotation = Vector3.Zero;
+        private Vector3 _localRotationInDegreesInDegrees = Vector3.Zero;
 
         private Vector3 _forward = -Vector3.UnitZ;
         private Vector3 _up = Vector3.UnitY;
         private Vector3 _right = Vector3.UnitX;
 
-        public Transform? parent = null;
+        public Transform? Parent = null;
 
         public Vector3 forward => _forward;
         public Vector3 up => _up;
@@ -26,9 +26,9 @@ namespace minecraft
         {
             get
             {
-                if (parent != null)
+                if (Parent != null)
                 {
-                    return Vector3.TransformPosition(_localPosition, parent.GetRotationMatrix()) + parent.position;
+                    return Vector3.TransformPosition(_localPosition, Parent.GetRotationMatrix()) + Parent.position;
                 }
                 else
                 {
@@ -37,9 +37,9 @@ namespace minecraft
             }
             set
             {
-                if (parent != null)
+                if (Parent != null)
                 {
-                    _localPosition = Vector3.TransformPosition(value - parent.position, parent.GetRotationMatrix().Inverted());
+                    _localPosition = Vector3.TransformPosition(value - Parent.position, Parent.GetRotationMatrix().Inverted());
                 }
                 else
                 {
@@ -50,16 +50,16 @@ namespace minecraft
 
         public Vector3 scale
         {
-            get => parent != null ? _localScale * parent.scale : _localScale;
-            set => _localScale = parent != null ? value / parent.scale : value;
+            get => Parent != null ? _localScale * Parent.scale : _localScale;
+            set => _localScale = Parent != null ? value / Parent.scale : value;
         }
 
-        public Vector3 eulerRotation
+        public Vector3 rotationInDegrees
         {
-            get => parent != null ? parent.eulerRotation + _eulerRotation : _eulerRotation;
+            get => Parent != null ? Parent.rotationInDegrees + _rotationInDegrees : _rotationInDegrees;
             set
             {
-                _eulerRotation = value;
+                _rotationInDegrees = value;
                 UpdateVectors();
             }
         }
@@ -80,19 +80,19 @@ namespace minecraft
             set => _localScale = value;
         }
 
-        public Vector3 localEulerRotation
+        public Vector3 localRotationInDegrees
         {
-            get => _localEulerRotation;
+            get => _localRotationInDegreesInDegrees;
             set
             {
-                _localEulerRotation = value;
+                _localRotationInDegreesInDegrees = value;
                 UpdateVectors();
             }
         }
         
         public void Rotate(Vector3 angles)
         {
-            _eulerRotation += angles;
+            _rotationInDegrees += angles;
             UpdateVectors();
         }
 
@@ -106,9 +106,9 @@ namespace minecraft
 
         private Matrix4 GetRotationMatrix()
         {
-            return Matrix4.CreateRotationX(MathHelper.DegreesToRadians(_eulerRotation.X))
-                 * Matrix4.CreateRotationY(MathHelper.DegreesToRadians(_eulerRotation.Y))
-                 * Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(_eulerRotation.Z));
+            return Matrix4.CreateRotationX(MathHelper.DegreesToRadians(_rotationInDegrees.X))
+                 * Matrix4.CreateRotationY(MathHelper.DegreesToRadians(_rotationInDegrees.Y))
+                 * Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(_rotationInDegrees.Z));
         }
     }
 }

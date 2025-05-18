@@ -1,7 +1,9 @@
+using minecraft.Collision;
+using minecraft.Sys;
 using minecraft.World;
 using OpenTK.Mathematics;
 
-namespace minecraft;
+namespace minecraft.Physics;
 
 public static class ChunkPhysics
 {
@@ -25,8 +27,8 @@ public static class ChunkPhysics
         for (var z = startZ; z <= endZ; z++)
         {
             WorldGenerator.Instance.TryGetBlockGlobal(new Vector3Int(x, y, z), out var block);
-
-            if (block == null || block.IsTransparent()) continue;
+            
+            if(block == null || block.IsPassable()) continue;
             
             var blockBox = new AABB(new Vector3(x, y + 0.5f, z), Vector3.One);
             

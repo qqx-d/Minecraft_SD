@@ -1,10 +1,9 @@
-﻿using minecraft;
-using minecraft.Rendering;
-using minecraft.Sys;
-using minecraft.World;
+﻿using minecraft.Rendering;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
+
+namespace minecraft.Sys;
 
 public static class Program 
 {

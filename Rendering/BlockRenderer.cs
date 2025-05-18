@@ -4,17 +4,60 @@ namespace minecraft.Rendering;
 
 public static class BlockRenderer
 {
+    private static readonly Vector3[] FrontFace = {
+        new(-0.5f, -0.5f, 0.5f),
+        new( 0.5f, -0.5f, 0.5f),
+        new( 0.5f,  0.5f, 0.5f),
+        new(-0.5f,  0.5f, 0.5f)
+    };
+    private static readonly Vector3[] BackFace = {
+        new( 0.5f, -0.5f, -0.5f),
+        new(-0.5f, -0.5f, -0.5f),
+        new(-0.5f,  0.5f, -0.5f),
+        new( 0.5f,  0.5f, -0.5f)
+    };
+    private static readonly Vector3[] LeftFace = {
+        new(-0.5f, -0.5f, -0.5f),
+        new(-0.5f, -0.5f,  0.5f),
+        new(-0.5f,  0.5f,  0.5f),
+        new(-0.5f,  0.5f, -0.5f)
+    };
+    private static readonly Vector3[] RightFace = {
+        new(0.5f, -0.5f, 0.5f),
+        new(0.5f, -0.5f, -0.5f),
+        new(0.5f, 0.5f, -0.5f),
+        new(0.5f, 0.5f, 0.5f)
+    };
+    private static readonly Vector3[] TopFace = {
+        new(-0.5f,  0.5f,  0.5f),
+        new( 0.5f,  0.5f,  0.5f),
+        new( 0.5f,  0.5f, -0.5f),
+        new(-0.5f,  0.5f, -0.5f)
+    };
+    private static readonly Vector3[] BottomFace = {
+        new(-0.5f, -0.5f, -0.5f),
+        new(0.5f, -0.5f, -0.5f),
+        new(0.5f, -0.5f, 0.5f),
+        new(-0.5f, -0.5f, 0.5f)
+    };
+
+    public static readonly Vector2[] BaseUVs = {
+        new(0, 0),
+        new(1, 0),
+        new(1, 1),
+        new(0, 1)
+    };
+    
     public static void AddFace(BlockFace face, Vector3 position, Vector2 uvOffset, List<float> vertices, List<uint> indices, ref uint vertexOffset)
     {
-        Vector3[] faceVerts = face switch
+        var faceVerts = face switch
         {
-            BlockFace.Front  => [new Vector3(-0.5f, -0.5f, 0.5f), new Vector3(0.5f, -0.5f, 0.5f), new Vector3(0.5f, 0.5f, 0.5f), new Vector3(-0.5f, 0.5f, 0.5f)],
-            BlockFace.Back   => [new Vector3(0.5f, -0.5f, -0.5f), new Vector3(-0.5f, -0.5f, -0.5f), new Vector3(-0.5f, 0.5f, -0.5f), new Vector3(0.5f, 0.5f, -0.5f)],
-            BlockFace.Left   => [new Vector3(-0.5f, -0.5f, -0.5f), new Vector3(-0.5f, -0.5f, 0.5f), new Vector3(-0.5f, 0.5f, 0.5f), new Vector3(-0.5f, 0.5f, -0.5f)],
-            BlockFace.Right  => [new Vector3(0.5f, -0.5f, 0.5f), new Vector3(0.5f, -0.5f, -0.5f), new Vector3(0.5f, 0.5f, -0.5f), new Vector3(0.5f, 0.5f, 0.5f)],
-            BlockFace.Top    => [new Vector3(-0.5f, 0.5f, 0.5f), new Vector3(0.5f, 0.5f, 0.5f), new Vector3(0.5f, 0.5f, -0.5f), new Vector3(-0.5f, 0.5f, -0.5f)],
-            BlockFace.Bottom => [new Vector3(-0.5f, -0.5f, -0.5f), new Vector3(0.5f, -0.5f, -0.5f), new Vector3(0.5f, -0.5f, 0.5f), new Vector3(-0.5f, -0.5f, 0.5f)],
-            _ => throw new ArgumentOutOfRangeException(nameof(face), face, null)
+            BlockFace.Front  => FrontFace,
+            BlockFace.Back   => BackFace,
+            BlockFace.Left   => LeftFace,
+            BlockFace.Right  => RightFace,
+            BlockFace.Top    => TopFace,
+            BlockFace.Bottom => BottomFace,
         };
 
         var (x, y, z) = face switch
@@ -25,16 +68,7 @@ public static class BlockRenderer
             BlockFace.Right  => Vector3.UnitX,
             BlockFace.Top    => Vector3.UnitY,
             BlockFace.Bottom => -Vector3.UnitY,
-            _ => Vector3.Zero
         };
-
-        Vector2[] baseUVs =
-        [
-            new(0, 0),
-            new(1, 0),
-            new(1, 1),
-            new(0, 1)
-        ];
         
         for (var i = 0; i < 4; i++)
         {
@@ -48,9 +82,7 @@ public static class BlockRenderer
             vertices.Add(y);
             vertices.Add(z);
             
-            const float tileSize = 1f / 16f;
-            
-            var uv = uvOffset + baseUVs[i] * tileSize;
+            var uv = uvOffset + BaseUVs[i] * BlockTextureRegistry.TileSize;
             vertices.Add(uv.X);
             vertices.Add(uv.Y);
         }

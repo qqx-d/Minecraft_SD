@@ -1,3 +1,4 @@
+using minecraft.Sys;
 using minecraft.World;
 using OpenTK.Mathematics;
 
@@ -5,6 +6,8 @@ namespace minecraft.Rendering;
 
 public static class ChunkMeshBuilder
 {
+    private const float GrassMeshHalfSize = 0.45f;
+    private const float GrassMeshHeight = 0.9f;
     
     private static readonly BlockFace[] BlockFaces = Enum.GetValues<BlockFace>();
     
@@ -35,6 +38,7 @@ public static class ChunkMeshBuilder
             {
                 var positionVec = new Vector3(localPos.X, localPos.Y, localPos.Z);
                 AddCrossPlaneGrass(positionVec, verticesTransparent, indicesTransparent, ref offsetWater);
+                
                 continue;
             }
             
@@ -55,9 +59,12 @@ public static class ChunkMeshBuilder
                 }
                 else if (block.IsTransparent())
                 {
-                    if (!WorldGenerator.Instance.TryGetBlockGlobal(neighborPos, out _) || neighborBlock.Id != block.Id)
+                    if(!WorldGenerator.Instance.TryGetBlockGlobal(neighborPos, out var neighbor) || neighbor.IsTransparent())
                     {
-                        BlockRenderer.AddFace(face, positionVec, uvOffset, verticesTransparent, indicesTransparent, ref offsetWater);
+                        if (neighbor == null || neighbor.Id != block.Id)
+                        {
+                            BlockRenderer.AddFace(face, positionVec, uvOffset, verticesTransparent, indicesTransparent, ref offsetWater);
+                        }
                     }
                 }
             }
@@ -72,42 +79,31 @@ public static class ChunkMeshBuilder
     private static void AddCrossPlaneGrass(Vector3 pos, List<float> vertices, List<uint> indices, ref uint offset)
     {
         var center = pos - new Vector3(0f, 0.5f, 0f);
-        const float halfSize = 0.45f;
-        const float height = 0.9f;
+        
 
         Vector3[] quad1 =
         [
-            center + new Vector3(-halfSize, 0, 0),
-            center + new Vector3( halfSize, 0, 0),
-            center + new Vector3( halfSize, height, 0),
-            center + new Vector3(-halfSize, height, 0)
+            center + new Vector3(-GrassMeshHalfSize, 0, 0),
+            center + new Vector3( GrassMeshHalfSize, 0, 0),
+            center + new Vector3( GrassMeshHalfSize, GrassMeshHeight, 0),
+            center + new Vector3(-GrassMeshHalfSize, GrassMeshHeight, 0)
         ];
 
         Vector3[] quad2 =
         [
-            center + new Vector3(0, 0, -halfSize),
-            center + new Vector3(0, 0,  halfSize),
-            center + new Vector3(0, height,  halfSize),
-            center + new Vector3(0, height, -halfSize)
+            center + new Vector3(0, 0, -GrassMeshHalfSize),
+            center + new Vector3(0, 0,  GrassMeshHalfSize),
+            center + new Vector3(0, GrassMeshHeight,  GrassMeshHalfSize),
+            center + new Vector3(0, GrassMeshHeight, -GrassMeshHalfSize)
         ];
-
-        Vector2[] uvs =
-        [
-            new(0, 0), new(1, 0),
-            new(1, 1), new(0, 1)
-        ];
-
-        const float tileSize = 1f / 16f;
-        const int tileX = 5;
-        const int tileY = 0;
-
-        AddQuad(quad1, uvs, vertices, indices, ref offset, tileX, tileY, tileSize);
-        AddQuad(quad2, uvs, vertices, indices, ref offset, tileX, tileY, tileSize);
+        
+        AddQuad(quad1, BlockRenderer.BaseUVs, vertices, indices, ref offset, 5, 0, BlockTextureRegistry.TileSize);
+        AddQuad(quad2, BlockRenderer.BaseUVs, vertices, indices, ref offset, 5, 0, BlockTextureRegistry.TileSize);
     }
 
     private static void AddQuad(Vector3[] quad, Vector2[] uvs, List<float> verts, List<uint> inds, ref uint offset, int tileX, int tileY, float tileSize)
     {
-        for (int i = 0; i < 4; i++)
+        for (var i = 0; i < 4; i++)
         {
             verts.Add(quad[i].X);
             verts.Add(quad[i].Y);
@@ -140,7 +136,6 @@ public static class ChunkMeshBuilder
             BlockFace.Right  => new Vector3Int(1, 0, 0),
             BlockFace.Front  => new Vector3Int(0, 0, 1),
             BlockFace.Back   => new Vector3Int(0, 0, -1),
-            _ => Vector3Int.Zero
         };
     }
 }

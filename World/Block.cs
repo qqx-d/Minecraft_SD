@@ -1,18 +1,20 @@
-namespace minecraft;
+namespace minecraft.World;
 
 public class Block(int id)
 {
-    public static readonly int[] TransparentBlockIds = new []
-    {
-        0, // air
-        6, // water
-        9, // grass
-    };
+    private readonly int[] _transparencyBlockIds = [0, 6, 9, 5];
 
+    private readonly int[] _passableBlockIds = [0, 6, 9];
+    
     public int Id { get; private set; } = id;
 
     public bool IsTransparent()
     {
-        return TransparentBlockIds.Contains(Id);
+        return _transparencyBlockIds.Contains(Id);
+    }
+
+    public bool IsPassable()
+    {
+        return _passableBlockIds.Contains(Id);
     }
 }

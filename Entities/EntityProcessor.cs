@@ -19,7 +19,7 @@ public static class EntityProcessor
 
     public static void UpdateProcessor()
     {
-        for (int i = 0; i < Entities.Count; i++)
+        for(var i = 0; i < Entities.Count; i++)
         {
             Entities[i].Update(Time.DeltaTime);
         }

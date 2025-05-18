@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "tGagu+Rcaj4=",
+  "dgSpecHash": "OyJ1EdeuBJ0=",
   "success": true,
   "projectFilePath": "C:\\Users\\mdima\\RiderProjects\\minecraft\\minecraft.csproj",
   "expectedPackageFiles": [
@@ -17,7 +17,11 @@
     "C:\\Users\\mdima\\.nuget\\packages\\opentk.windowing.graphicslibraryframework\\4.9.4\\opentk.windowing.graphicslibraryframework.4.9.4.nupkg.sha512",
     "C:\\Users\\mdima\\.nuget\\packages\\stbimagesharp\\2.30.15\\stbimagesharp.2.30.15.nupkg.sha512",
     "C:\\Users\\mdima\\.nuget\\packages\\system.runtime.compilerservices.unsafe\\6.0.0\\system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512",
-    "C:\\Users\\mdima\\.nuget\\packages\\udun.fastnoiselite\\1.0.1\\udun.fastnoiselite.1.0.1.nupkg.sha512"
+    "C:\\Users\\mdima\\.nuget\\packages\\udun.fastnoiselite\\1.0.1\\udun.fastnoiselite.1.0.1.nupkg.sha512",
+    "C:\\Users\\mdima\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.13\\microsoft.netcore.app.ref.8.0.13.nupkg.sha512",
+    "C:\\Users\\mdima\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.13\\microsoft.windowsdesktop.app.ref.8.0.13.nupkg.sha512",
+    "C:\\Users\\mdima\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.13\\microsoft.aspnetcore.app.ref.8.0.13.nupkg.sha512",
+    "C:\\Users\\mdima\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\8.0.13\\microsoft.netcore.app.host.win-x64.8.0.13.nupkg.sha512"
   ],
   "logs": []
 }

@@ -16,7 +16,7 @@ public class WorldGenerator
     public const int ChunkHeight = 64;
     public const int RenderDistance = 12;
     
-    public const int SeaLevel = 32;
+    public const int SeaLevel = ChunkHeight / 2;
     
     public static FastNoiseLite FastNoiseLite { get; private set; }
     public static FastNoiseLite ForestNoise { get; private set; }
@@ -30,31 +30,31 @@ public class WorldGenerator
     private readonly SemaphoreSlim _generationLimiter;
     private readonly SemaphoreSlim _meshBuildLimiter;
     
-    private readonly Vector3Int[] _initialPositions =
-    [
+    private readonly Vector3Int[] _initialPositions = {
         new(0, 0, -ChunkWidth),
         new(-ChunkWidth, 0, 0),
         new(0, 0, 0),
         new(-ChunkWidth, 0, -ChunkWidth)
-    ];
-    
-    private readonly Vector3Int[] _neighbourChunksDirections =
-    [
+    };
+    private readonly Vector3Int[] _neighbourChunksDirections = {
         new(ChunkWidth, 0, 0),
         new(-ChunkWidth, 0, 0),
         new(0, 0, ChunkWidth),
         new(0, 0, -ChunkWidth)
-    ];
+    };
     
     public WorldGenerator()
     {
         Instance = this;
 
-        var cpu = Environment.ProcessorCount;
+        var cpuCount = Environment.ProcessorCount;
+        var cpuMaxUse = Math.Max((int)Math.Ceiling(cpuCount * 2.0 / 3.0), 1);
         
-        _generationLimiter = new SemaphoreSlim(Math.Max(1, cpu - 8));
-        _meshBuildLimiter = new SemaphoreSlim(Math.Max(1, cpu  - 8));
+        _generationLimiter = new SemaphoreSlim(cpuMaxUse);
+        _meshBuildLimiter = new SemaphoreSlim(cpuMaxUse);
 
+        Console.WriteLine($"=== Run at '{cpuMaxUse}' processor count ===");
+        
         InitializeNoises();
     }
 
@@ -78,31 +78,34 @@ public class WorldGenerator
         CaveNoise.SetNoiseType(NoiseType.OpenSimplex2);
     }
 
-    public Chunk GetChunkAt(Vector3Int position)
+    private Chunk GetChunkAt(Vector3Int position)
     {
-        if(!_generatedChunks.ContainsKey(position))
+        if(!_generatedChunks.TryGetValue(position, out var value))
         {
-            _generatedChunks.Add(position, new Chunk(position));
+            value = new Chunk(position);
+            
+            _generatedChunks.Add(position, value);
         }
 
-        return _generatedChunks[position];
+        return value;
     }
 
     public void Update()
     {
-        RenderChunks(Window.ActiveCamera.transform.position);
-
-        while (_chunksToUpdate.TryDequeue(out var chunk))
-        {
-            chunk.OpaqueMesh.Upload(chunk.OpaqueMesh.Vertices, chunk.OpaqueMesh.Indices);
-            chunk.TransparentMesh.Upload(chunk.TransparentMesh.Vertices, chunk.TransparentMesh.Indices);
-        }
+        RenderChunks(Window.ActiveCamera.Transform.position);
         
         while (_chunksToUpload.TryDequeue(out var chunk))
         {
             chunk.OpaqueMesh.Upload(chunk.OpaqueMesh.Vertices, chunk.OpaqueMesh.Indices);
             chunk.TransparentMesh.Upload(chunk.TransparentMesh.Vertices, chunk.TransparentMesh.Indices);
+            
             ChunkRenderer.AddToRender(chunk);
+        }
+        
+        while (_chunksToUpdate.TryDequeue(out var chunk))
+        {
+            chunk.OpaqueMesh.Upload(chunk.OpaqueMesh.Vertices, chunk.OpaqueMesh.Indices);
+            chunk.TransparentMesh.Upload(chunk.TransparentMesh.Vertices, chunk.TransparentMesh.Indices);
         }
     }
 
@@ -114,10 +117,11 @@ public class WorldGenerator
 
         var chunkPositions = new List<Vector3Int>();
 
-        for (var dx = -RenderDistance; dx <= RenderDistance; dx++)
-        for (var dz = -RenderDistance; dz <= RenderDistance; dz++)
+        for(var dx = -RenderDistance; dx <= RenderDistance; dx++)
+        for(var dz = -RenderDistance; dz <= RenderDistance; dz++)
         {
             var chunkPos = new Vector3Int((playerChunkX + dx) * ChunkWidth, 0, (playerChunkZ + dz) * ChunkWidth);
+            
             chunkPositions.Add(chunkPos);
         }
         
@@ -129,6 +133,8 @@ public class WorldGenerator
         {
             var chunk = GetChunkAt(chunkPos);
 
+            if(_chunksToUpload.Contains(chunk)) continue;
+            
             if (!chunk.DataGenerated)
             {
                 _ = Task.Run(async () =>
@@ -137,8 +143,11 @@ public class WorldGenerator
                     try
                     {
                         await chunk.GenerateDataAsync();
+                        
                         ChunkMeshBuilder.BuildChunkMesh(chunk);
+                        
                         _chunksToUpload.Enqueue(chunk);
+                        
                         UpdateNeighborChunkMeshes(chunk.Position);
                     }
                     finally
@@ -151,14 +160,13 @@ public class WorldGenerator
             ChunkRenderer.AddToRender(chunk);
         }
     }
-
     
     public void GenerateInitialChunks()
     {
         foreach (var pos in _initialPositions)
         {
             var chunk = GetChunkAt(pos);
-            chunk.GenerateDataAsync().Wait();
+            _ = chunk.GenerateDataAsync(false);
             ChunkMeshBuilder.BuildChunkMesh(chunk);
             chunk.OpaqueMesh.Upload(chunk.OpaqueMesh.Vertices, chunk.OpaqueMesh.Indices);
             chunk.TransparentMesh.Upload(chunk.TransparentMesh.Vertices, chunk.TransparentMesh.Indices);
@@ -198,8 +206,8 @@ public class WorldGenerator
             (worldPos.Z - chunkPos.Z)
         );
 
-        chunk.GetAllBlocks().Remove(localPos);
-
+        chunk.GetAllBlocks().TryRemove(localPos, out _);
+        
         _ = UpdateChunkMeshAsync(chunk);
         UpdateNeighborChunks(worldPos);
     }
@@ -214,10 +222,13 @@ public class WorldGenerator
             var chunkZ = (int)MathF.Floor((float) neighborPos.Z / ChunkWidth) * ChunkWidth;
             Vector3Int chunkPos = new(chunkX, 0, chunkZ);
 
-            var neighbor = GetChunkAt(chunkPos);
-            neighbor.BuildMesh();
+            if (_generatedChunks.TryGetValue(chunkPos, out var neighbor))
+            {
+                _ = UpdateChunkMeshAsync(neighbor);
+            }
         }
     }
+
 
     private async Task UpdateChunkMeshAsync(Chunk chunk)
     {

@@ -1,3 +1,4 @@
+using minecraft.Camera;
 using mmd_sd.Helpers;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
@@ -8,20 +9,23 @@ namespace minecraft.Entities.Player;
 public class Player : Entity
 {
     private const float JumpForce = 6f;
-
+    private const float JumpForceInWater = 5.75f;
     private const float WalkSpeed = 3f;
+    private const float WalkSpeedInWater = 1.85f;
     private const float SprintSpeed = 5f;
-    private float _currentSpeed = 0f;
     
-    private float _breakTimer = 0f;
-    private float _placeTimer = 0f;
+    private float _currentSpeed;
+    private float _jumpForce;
+    
+    private float _breakTimer;
+    private float _placeTimer;
 
     private const float BreakDelay = 0.25f;
     private const float PlaceDelay = 0.25f;
     
-    private BlockInteractor _blockInteractor;
+    private readonly BlockInteractor _blockInteractor;
 
-    public int SelectedBlockID { get; private set; } = 1;
+    public int SelectedBlockId { get; private set; } = 1;
 
     public Player() : base(new Vector3(0.6f, 1.8f, 0.6f))
     {
@@ -30,8 +34,10 @@ public class Player : Entity
     
     public override void Update(float deltaTime)
     {
+        if(Window.CameraMode == CameraMode.Free) return;
+        
         HandleInput(deltaTime);
-
+        
         _breakTimer -= deltaTime;
         _placeTimer -= deltaTime;
 
@@ -46,19 +52,31 @@ public class Player : Entity
             if(_blockInteractor.TryPlaceBlock())
                 _placeTimer = PlaceDelay;
         }
+        
+        if(IsInWater && Input.GetKey(Keys.Space))
+        {
+            MoveVertical(Vector3.UnitY, 5, deltaTime);
+        }
 
-        SelectedBlockID = Math.Clamp(SelectedBlockID - Math.Sign(Input.MouseWheelDelta), 1, 7);
+        SelectedBlockId = Math.Clamp(SelectedBlockId - Math.Sign(Input.MouseWheelDelta), 1, 7);
     }
 
     private void HandleInput(float deltaTime)
     {
-        _currentSpeed = Input.GetKey(Keys.LeftControl) ? SprintSpeed : WalkSpeed;
+        var controlPressed = Input.GetKey(Keys.LeftControl);
+
+        _currentSpeed = controlPressed switch
+        {
+            true when IsGrounded && !IsInWater => SprintSpeed,
+            false when IsGrounded && !IsInWater => WalkSpeed,
+            _ => IsInWater ? WalkSpeedInWater : WalkSpeed
+        };
         
-        var flatForward = Window.ActiveCamera.transform.forward;
+        var flatForward = Window.ActiveCamera.Transform.forward;
         flatForward.Y = 0;
         flatForward = flatForward.Normalized();
 
-        var flatRight = Window.ActiveCamera.transform.right;
+        var flatRight = Window.ActiveCamera.Transform.right;
         flatRight.Y = 0;
         flatRight = flatRight.Normalized();
 
@@ -78,6 +96,8 @@ public class Player : Entity
     }
     private void TryJump()
     {
-        Jump(JumpForce);
+        _jumpForce = IsInWater ? JumpForceInWater : JumpForce;
+        
+        Jump(_jumpForce);
     }
 }

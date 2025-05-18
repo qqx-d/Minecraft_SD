@@ -3,35 +3,28 @@ using minecraft.World;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
-namespace minecraft;
+namespace minecraft.Rendering;
 
 public static class ChunkRenderer
 {
-    
-    private static readonly Queue<Chunk> _chunksToRender = new();
+    private static readonly Queue<Chunk> ChunksToRender = new();
     
     public static Texture AtlasTexture;
     
     public static void AddToRender(Chunk chunk)
     {
-        if(!_chunksToRender.Contains(chunk))
-            _chunksToRender.Enqueue(chunk);
-    }
-    
-    public static void RemoveToRender(Chunk chunk)
-    {
-        if(_chunksToRender.Contains(chunk))
-            _chunksToRender.Dequeue();
+        if(!ChunksToRender.Contains(chunk))
+            ChunksToRender.Enqueue(chunk);
     }
     
     public static void DrawAll()
     {
-        var chunks = _chunksToRender.ToArray();
+        var chunks = ChunksToRender.ToArray();
 
         RenderSimpleMesh(chunks);
         RenderTransparentSupportedMesh(chunks);
         
-        _chunksToRender.Clear();
+        ChunksToRender.Clear();
     }
 
     private static void RenderSimpleMesh(Chunk[] chunks)
@@ -40,14 +33,17 @@ public static class ChunkRenderer
         {
             if (!chunk.OpaqueMesh.IsMeshUploaded) continue;
 
+            var camera = Window.ActiveCamera;
             var shader = chunk.OpaqueMesh.Shader;
             shader.Use();
-            shader.SetMatrix4("view",       Window.ActiveCamera.GetViewMatrix());
-            shader.SetMatrix4("projection", Window.ActiveCamera.GetProjectionMatrix());
+            shader.SetMatrix4("view",camera.GetViewMatrix());
+            shader.SetMatrix4("projection",camera.GetProjectionMatrix());
             shader.SetVector3("lightDir",   new Vector3(0.5f, -1f, 0.5f));
             shader.SetVector3("lightColor", new Vector3(1f, 1f, 1f));
             shader.SetVector3("ambientColor", new Vector3(0.2f, 0.2f, 0.2f));
 
+            shader.SetVector3("cameraPos", camera.Transform.position);
+            
             var model = Matrix4.CreateTranslation(chunk.Position.X, chunk.Position.Y, chunk.Position.Z);
             shader.SetMatrix4("model", model);
 
@@ -63,7 +59,8 @@ public static class ChunkRenderer
         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
         GL.DepthMask(false);
         
-        Vector3 camPos = Window.ActiveCamera.transform.position;
+        var camera = Window.ActiveCamera;
+        var cameraPosition = camera.Transform.position;
         var sorted = chunks
             .Where(c => c.TransparentMesh.IsMeshUploaded)
             .OrderByDescending(c =>
@@ -72,23 +69,25 @@ public static class ChunkRenderer
                     c.Position.X + WorldGenerator.ChunkWidth / 2f,
                     c.Position.Y + WorldGenerator.ChunkHeight / 2f,
                     c.Position.Z + WorldGenerator.ChunkWidth / 2f);
-                return (center - camPos).LengthSquared;
+                return (center - cameraPosition).LengthSquared;
             });
 
         foreach (var chunk in sorted)
         {
             var shader = chunk.TransparentMesh.Shader;
             shader.Use();
-            shader.SetMatrix4("view",       Window.ActiveCamera.GetViewMatrix());
-            shader.SetMatrix4("projection", Window.ActiveCamera.GetProjectionMatrix());
-            shader.SetVector3("cameraPos",  camPos);
+            shader.SetMatrix4("view",camera.GetViewMatrix());
+            shader.SetMatrix4("projection",camera.GetProjectionMatrix());
+            shader.SetVector3("cameraPos", cameraPosition);
 
             var model = Matrix4.CreateTranslation(chunk.Position.X, chunk.Position.Y, chunk.Position.Z);
             shader.SetMatrix4("model", model);
             
+            shader.SetVector3("cameraPos", camera.Transform.position);
+            
             AtlasTexture.Use(TextureUnit.Texture0);
             shader.SetInt("texture0", 0);
-
+            
             chunk.TransparentMesh.Draw();
         }
 

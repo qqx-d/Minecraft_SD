@@ -1,17 +1,12 @@
 using OpenTK.Mathematics;
 
-namespace minecraft;
+namespace minecraft.Sys;
 
-public record struct Vector3Int
+public record struct Vector3Int(int X = 0, int Y = 0, int Z = 0)
 {
-    public int X, Y, Z;
+    public int X = X, Y = Y, Z = Z;
     public static Vector3Int Zero => new(0, 0, 0);
-    public Vector3Int(int x = 0, int y = 0, int z = 0)
-    {
-        X = x;
-        Y = y;
-        Z = z;
-    }
+    public static Vector3Int Up => new(0, 1, 0);
 
     public static Vector3Int operator +(Vector3Int v1, Vector3Int v2)
     {
@@ -58,4 +53,11 @@ public record struct Vector3Int
         return new Vector3(vi.X, vi.Y, vi.Z);
     }
 
+    public static Vector3Int RoundToInt(Vector3 v)
+    {
+        return new Vector3Int(
+            (int)Math.Round(v.X),
+            (int)Math.Round(v.Y),
+            (int)Math.Round(v.Z));
+    }
 }
